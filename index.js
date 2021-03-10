@@ -8,6 +8,8 @@ const filters = document.querySelectorAll('.filters input');
 const outputs = document.querySelectorAll('output');
 
 const btnReset = document.querySelector('.btn-reset').addEventListener('click', reset);
+const btnNext = document.querySelector('.btn-next').addEventListener('click', getImage);
+let imageCount = 0;
 
 
 function toggleScreen() {
@@ -71,6 +73,42 @@ function reset() {
     });
 
     outputs.forEach((item, index) => index === 3 ? item.innerHTML = 100 : item.innerHTML = 0);
+}
+
+function getTimeOfDay() {
+    const time = new Date().getHours();
+    const arrTimesOfDay = ['morning', 'day', 'evening', 'night'];
+    let timeOfDay;
+
+    if (time >= 6 && time < 12) {
+        timeOfDay = arrTimesOfDay[0];
+    } else if (time >= 12 && time < 18) {
+        timeOfDay = arrTimesOfDay[1];
+    } else if (time >= 18 && time < 24) {
+        timeOfDay = arrTimesOfDay[2];
+    } else if (time >= 0 && time < 6) {
+        timeOfDay = arrTimesOfDay[3];
+    } else {timeOfDay = 'tyt'}
+
+    return timeOfDay;
+}
+
+function viewImage(src) {
+    const img = document.querySelector('img');
+    img.src = src;
+    img.onload = () => {
+        img.style.backgroundImage = `url(${src})`;
+    };
+}
+
+function getImage() {
+    const baseUrl = 'https://raw.githubusercontent.com/rolling-scopes-school/stage1-tasks/assets/images/';
+    const images = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
+    const urlTimeOfDay  = baseUrl + getTimeOfDay() + '/';
+    const index = imageCount % images.length;
+    const imageSrc = urlTimeOfDay + images[index] + '.jpg';
+    viewImage(imageSrc);
+    imageCount++;
 }
 
 filters.forEach(input => input.addEventListener('input', handleUpdate));
