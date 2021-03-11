@@ -95,32 +95,26 @@ function getTimeOfDay() {
     return timeOfDay;
 }
 
-function viewImage(src) {
-    img.src = src;
-    img.onload = () => {
-        img.style.backgroundImage = `url(${src})`;
-    };
-}
-
 function getImage() {
     const baseUrl = 'https://raw.githubusercontent.com/rolling-scopes-school/stage1-tasks/assets/images/';
     const images = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
     const urlTimeOfDay  = baseUrl + getTimeOfDay() + '/';
     const index = imageCount % images.length;
     const imageSrc = urlTimeOfDay + images[index] + '.jpg';
-    viewImage(imageSrc);
+    img.src = imageSrc;
     imageCount++;
 }
 
 fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
         img.src = reader.result;
         img.innerHTML = '';
     }
     
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(file);
 });
 
 filters.forEach(input => input.addEventListener('input', handleUpdate));
