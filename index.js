@@ -9,6 +9,8 @@ const outputs = document.querySelectorAll('output');
 
 const btnReset = document.querySelector('.btn-reset').addEventListener('click', reset);
 const btnNext = document.querySelector('.btn-next').addEventListener('click', getImage);
+const fileInput = document.querySelector('input[type="file"]');
+const img = document.querySelector('img');
 let imageCount = 0;
 
 
@@ -94,7 +96,6 @@ function getTimeOfDay() {
 }
 
 function viewImage(src) {
-    const img = document.querySelector('img');
     img.src = src;
     img.onload = () => {
         img.style.backgroundImage = `url(${src})`;
@@ -110,5 +111,16 @@ function getImage() {
     viewImage(imageSrc);
     imageCount++;
 }
+
+fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+        img.src = reader.result;
+        img.innerHTML = '';
+    }
+    
+    reader.readAsDataURL(file)
+});
 
 filters.forEach(input => input.addEventListener('input', handleUpdate));
