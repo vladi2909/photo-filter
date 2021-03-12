@@ -168,7 +168,7 @@ output {
   --saturate: 100%;
   --hue: 0deg;
 }
-img {
+/* img {
   height: 100%;
   width: 100%;
   max-height: 520px;
@@ -177,7 +177,17 @@ img {
   filter: blur(var(--blur, 0px)) invert(var(--invert, 0%))
     sepia(var(--sepia, 0%)) saturate(var(--saturate, 100%))
     hue-rotate(var(--hue, 0deg));
+} */
+
+canvas {
+  height: 100%;
+  width: 100%;
+  max-height: 520px;
+  max-width: 830px;
+  background-color: #fff;
 }
+
+
 .fullscreen {
   position: fixed;
   top: 120px;

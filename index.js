@@ -1,73 +1,49 @@
-const fullScreenBtn = document.querySelector('.fullscreen').addEventListener('click', toggleScreen);
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
 
-const btnsContainer = document.querySelector('.btn-container').addEventListener('click', e => toggleBtns(e));
-const btns = document.querySelectorAll('.btn');
-const btnLoad = document.querySelector('.btn-load');
+let img = new Image();
+let fileName = '';
+
+const downloadBtn = document.querySelector('.btn-save');
+const uploadFile = document.querySelector('.btn-load--input');
+const resetBtn = document.querySelector('.btn-reset');
+const nextBtn = document.querySelector('.btn-next');
 
 const filters = document.querySelectorAll('.filters input');
 const outputs = document.querySelectorAll('output');
 
-const btnReset = document.querySelector('.btn-reset').addEventListener('click', reset);
-const btnNext = document.querySelector('.btn-next').addEventListener('click', getImage);
-const fileInput = document.querySelector('input[type="file"]');
-const img = document.querySelector('img');
 let imageCount = 0;
 
+// Add filters
+filters.forEach(input => input.addEventListener('input', (e) => {
+    
 
-function toggleScreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-    } else {
-        if (document.fullscreenEnabled) {
-            document.exitFullscreen();
-        }
-    }
-}
-
-function toggleBtns(e) {
-    if (e.target.classList.contains('btn')) {
-        btns.forEach(btn => {
-            if (btn.classList.contains('btn-active')) {
-                btn.classList.remove('btn-active');
-            }
-        });
-
-        e.target.classList.add('btn-active');
-    }
-
-    if (e.target.classList.value === 'btn-load--input') {
-        btns.forEach(btn => btn.classList.remove('btn-active'));
-        btnLoad.classList.add('btn-active');
-    }
-}
-
-function handleUpdate() {
-    const suffix = this.dataset.sizing || '';
-    document.documentElement.style.setProperty(`--${this.name}`, this.value + suffix);
-
-    switch (this.name) {
+    switch (e.target.name) {
         case 'blur':
-            outputs[0].innerHTML = this.value;
+            outputs[0].innerHTML = e.target.value;
             break;
         case 'invert':
-            outputs[1].innerHTML = this.value;
+            outputs[1].innerHTML = e.target.value;
             break;
         case 'sepia':
-            outputs[2].innerHTML = this.value;
+            outputs[2].innerHTML = e.target.value;
             break;
         case 'saturate':
-            outputs[3].innerHTML = this.value;
+            outputs[3].innerHTML = e.target.value;
             break;
-        case 'hue':
-            outputs[4].innerHTML = this.value;
+        case 'hue-rotate':
+            outputs[4].innerHTML = e.target.value;
             break;
         default:
             break;
     }
 
-}
+    ctx.filter = `blur(${outputs[0].value}px) invert(${outputs[1].value}%) sepia(${outputs[2].value}%) saturate(${outputs[3].value}%) hue-rotate(${outputs[4].value}deg)`;
+    ctx.drawImage(img, 0 , 0);
+}));
 
-function reset() {
+// resert file
+resetBtn.addEventListener('click', (e) => {
     filters.forEach((input, index) =>  {
         const suffix = input.dataset.sizing || '';
         (index === 3) ? input.value = 100 : input.value = 0;
@@ -75,7 +51,27 @@ function reset() {
     });
 
     outputs.forEach((item, index) => index === 3 ? item.innerHTML = 100 : item.innerHTML = 0);
-}
+    ctx.filter = `blur(0px) invert(0%) sepia(0%) saturate(100%) hue-rotate(0deg)`;
+    ctx.drawImage(img, 0 , 0);
+});
+
+nextBtn.addEventListener('click', (e) => {
+    const baseUrl = 'https://raw.githubusercontent.com/rolling-scopes-school/stage1-tasks/assets/images/';
+    const imgNum = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
+    const urlTimeOfDay  = baseUrl + getTimeOfDay() + '/';
+    const index = imageCount % imgNum.length;
+    const imageSrc = urlTimeOfDay + imgNum[index] + '.jpg';
+    // img = new Image();
+    img.src = imageSrc;
+    img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+    }
+
+    imageCount++;
+
+});
 
 function getTimeOfDay() {
     const time = new Date().getHours();
@@ -95,26 +91,44 @@ function getTimeOfDay() {
     return timeOfDay;
 }
 
-function getImage() {
-    const baseUrl = 'https://raw.githubusercontent.com/rolling-scopes-school/stage1-tasks/assets/images/';
-    const images = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
-    const urlTimeOfDay  = baseUrl + getTimeOfDay() + '/';
-    const index = imageCount % images.length;
-    const imageSrc = urlTimeOfDay + images[index] + '.jpg';
-    img.src = imageSrc;
-    imageCount++;
-}
-
-fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (!file) return;
+// Upload file
+uploadFile.addEventListener('change', (e) => {
+    const file = uploadFile.files[0];
     const reader = new FileReader();
-    reader.onload = () => {
-        img.src = reader.result;
-        img.innerHTML = '';
+
+    if (file) {
+        fileName = file.name;
+        reader.readAsDataURL(file);
     }
-    
-    reader.readAsDataURL(file);
+
+    reader.addEventListener('load', () => {
+        img = new Image();
+        img.src = reader.result;
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+        }
+    }, false);
+
 });
 
-filters.forEach(input => input.addEventListener('input', handleUpdate));
+// download
+downloadBtn.addEventListener('click', (e) => {
+    const fileExtension = fileName.slice(-4);
+    let newFileName;
+    
+    if (fileExtension === '.jpg' || fileExtension === '.png') {
+        newFileName = fileName.substring(0, fileName.length - 4) + '(edited).jpg';
+    }
+
+    download(canvas, newFileName);
+});
+
+function download(canvas, filename) {
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/jpeg');
+    link.click();
+    link.delete;
+}
