@@ -6,13 +6,17 @@ const outputs = document.querySelectorAll('output');
 
 let fileName = '';
 let img = new Image();
+let imageCount = 0;
 
 const resetBtn = document.querySelector('.btn-reset');
 const nextBtn = document.querySelector('.btn-next');
 const uploadBtn = document.querySelector('input[type="file"]');
 const downloadBtn = document.querySelector('.btn-save');
 
-let imageCount = 0;
+const fullScreenBtn = document.querySelector('.fullscreen');
+const btnsContainer = document.querySelector('.btn-container');
+const btns = document.querySelectorAll('.btn');
+const btnLoad = document.querySelector('.btn-load');
 
 // Download default image
 window.onload = () => {
@@ -58,7 +62,8 @@ resetBtn.addEventListener('click', () => {
     filterDef.forEach((input, index) =>  {
         const suffix = input.dataset.sizing || '';
         (index === 3) ? input.value = 100 : input.value = 0;
-        document.documentElement.style.setProperty(`--${input.name}`, input.value + suffix);
+        const name = input.name === 'hue-rotate' ? input.name.slice(0, 3) : input.name;
+        document.documentElement.style.setProperty(`--${name}`, input.value + suffix);
     });
 
     outputs.forEach((item, index) => index === 3 ? item.innerHTML = 100 : item.innerHTML = 0);
@@ -136,4 +141,31 @@ downloadBtn.addEventListener('click', (e) => {
     link.href = canvas.toDataURL('image/jpeg');
     link.click();
     link.delete;
+});
+
+fullScreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        if (document.fullscreenEnabled) {
+            document.exitFullscreen();
+        }
+    }
+});
+
+btnsContainer.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn')) {
+        btns.forEach(btn => {
+            if (btn.classList.contains('btn-active')) {
+                btn.classList.remove('btn-active');
+            }
+        });
+
+        e.target.classList.add('btn-active');
+    }
+
+    if (e.target.classList.value === 'btn-load--input') {
+        btns.forEach(btn => btn.classList.remove('btn-active'));
+        btnLoad.classList.add('btn-active');
+    } 
 });
